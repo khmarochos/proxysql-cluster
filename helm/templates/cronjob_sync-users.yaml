@@ -1,0 +1,30 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "proxysql-cluster.fullname" . }}-sync-users
+  labels:
+    {{- include "proxysql-cluster.labels" . | nindent 4 }}
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - args:
+            - /opt/proxysql-admin-tool/proxysql-admin
+            - --config-file=/opt/proxysql-admin-tool/etc/proxysql-admin.cnf
+            - --syncusers
+            image: volodymyrmelnyk/proxysql-admin-tool:v1.4.14
+            name: proxysql-admin
+            stdin: true
+            stdinOnce: true
+            volumeMounts:
+            - mountPath: /opt/proxysql-admin-tool/etc
+              name: proxysql-admin-config
+              readOnly: true
+          restartPolicy: OnFailure
+          volumes:
+          - name: proxysql-admin-config
+            secret:
+              secretName: {{ include "proxysql-cluster.fullname" . }}-admin-configuration

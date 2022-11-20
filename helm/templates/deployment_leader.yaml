@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "proxysql-cluster.fullname" . }}-leader
+  labels:
+    {{- include "proxysql-cluster.labels" . | nindent 4 }}
+    app.kubernetes.io/component: leader
+spec:
+  replicas: {{ .Values.replicaCount.leader }}
+  selector:
+    matchLabels:
+      {{- include "proxysql-cluster.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: leader
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        {{- include "proxysql-cluster.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: leader
+    spec:
+      serviceAccountName: {{ include "proxysql-cluster.serviceAccountName" . }}
+      restartPolicy: Always
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: proxysql
+          volumeMounts:
+          - name: proxysql-leader-config
+            mountPath: /etc/proxysql.cnf
+            subPath: proxysql.cnf
+          - name: proxysql-data
+            mountPath: /var/lib/proxysql
+          ports:
+          - containerPort: {{ .Values.tcpPort.proxysqlCluster }}
+            name: proxysql-mysql
+          - containerPort: {{ .Values.tcpPort.proxysqlAdmin }}
+            name: proxysql-admin
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: proxysql-leader-config
+          secret:
+            secretName: {{ include "proxysql-cluster.fullname" . }}-leader-configuration
+        - name: proxysql-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (printf "%s-leader-data" (include "proxysql-cluster.fullname" .)) }}

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "proxysql-cluster.fullname" . }}-leader
+spec:
+  selector:
+    {{- include "proxysql-cluster.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: leader
+  ports:
+  - protocol: TCP
+    port: {{ .Values.tcpPort.proxysqlCluster }}
+    targetPort: {{ .Values.tcpPort.proxysqlCluster }}
+    name: proxysql
+  - protocol: TCP
+    port: {{ .Values.tcpPort.proxysqlAdmin }}
+    targetPort: {{ .Values.tcpPort.proxysqlAdmin }}
+    name: proxysql-admin
