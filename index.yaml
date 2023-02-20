@@ -3,6 +3,16 @@ entries:
   proxysql-cluster:
   - apiVersion: v2
     appVersion: 2.4.8
+    created: "2023-02-20T15:37:25.577918219Z"
+    description: A Helm chart ProxySQL clusters
+    digest: c6326326c7bafdcb3b8b6b0887dd7c24f0a1548a08a3c559cf4c445e3cd55186
+    name: proxysql-cluster
+    type: application
+    urls:
+    - https://github.com/khmarochos/proxysql-cluster/releases/download/proxysql-cluster-0.0.20/proxysql-cluster-0.0.20.tgz
+    version: 0.0.20
+  - apiVersion: v2
+    appVersion: 2.4.8
     created: "2023-02-20T14:43:31.617589638Z"
     description: A Helm chart ProxySQL clusters
     digest: 3bda9b39fd0ba0f75a6c900285bd88f5c38c8095cdb13298c11f192be824680e
@@ -41,4 +51,4 @@ entries:
     urls:
     - https://github.com/khmarochos/proxysql-cluster/releases/download/proxysql-cluster-0.0.15/proxysql-cluster-0.0.15.tgz
     version: 0.0.15
-generated: "2023-02-20T14:43:31.617603739Z"
+generated: "2023-02-20T15:37:25.577933319Z"
