@@ -60,6 +60,10 @@ database:
       password: ""
   servers: []
 
+syncUsers:
+  enabled: true
+  schedule: "* * * * *"
+
 tcpPort:
   databaseCluster: 3306
   proxysqlCluster: 3306

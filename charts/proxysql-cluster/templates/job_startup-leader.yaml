@@ -1,0 +1,28 @@
+apjobiversion: batch/v1beta1
+kind: Job
+metadata:
+  name: {{ include "proxysql-cluster.fullname" . }}-startup-leader
+  labels:
+    {{- include "proxysql-cluster.labels" . | nindent 4 }}
+  annotations:
+    helm.io/hooks: post-install,post-upgrade
+spec:
+  template:
+    spec:
+      containers:
+      - args:
+        - "LOAD MYSQL SERVERS TO RUNTIME; LOAD MYSQL QUERY RULES TO RUNTIME; LOAD MYSQL SERVERS TO RUNTIME;"
+        image: mysql
+        name: mysql-client
+        stdin: true
+        stdinOnce: true
+        volumeMounts:
+        - mountPath: /root/.my.cnf
+          subPath: .my.cnf
+          name: mysql-configuration
+          readOnly: true
+      restartPolicy: OnFailure
+      volumes:
+      - name: mysql-configuration
+        secret:
+          secretName: {{ include "proxysql-cluster.fullname" . }}-.my.cnf

@@ -1,3 +1,4 @@
+{{- if .Values.syncUsers.enabled }}
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
@@ -5,7 +6,7 @@ metadata:
   labels:
     {{- include "proxysql-cluster.labels" . | nindent 4 }}
 spec:
-  schedule: "* * * * *"
+  schedule: {{ .Values.syncUsers.schedule | default "* * * * *" | quote }}
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
@@ -29,3 +30,4 @@ spec:
           - name: proxysql-admin-config
             secret:
               secretName: {{ include "proxysql-cluster.fullname" . }}-admin-configuration
+{{- end }}
