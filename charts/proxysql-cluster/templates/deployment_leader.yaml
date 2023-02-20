@@ -47,5 +47,9 @@ spec:
           secret:
             secretName: {{ include "proxysql-cluster.fullname" . }}-leader-configuration
         - name: proxysql-data
+          {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim | default (printf "%s-leader-data" (include "proxysql-cluster.fullname" .)) }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

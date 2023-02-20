@@ -39,7 +39,7 @@ securityContext: {}
   # runAsUser: 1000
 
 persistence:
-  enabled: true
+  enabled: false
   existingClaim: ""
   accessModes:
     - ReadWriteOnce
