@@ -1,4 +1,4 @@
-apjobiversion: batch/v1beta1
+apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "proxysql-cluster.fullname" . }}-startup-leader
@@ -11,7 +11,15 @@ spec:
     spec:
       containers:
       - args:
-        - "LOAD MYSQL SERVERS TO RUNTIME; LOAD MYSQL QUERY RULES TO RUNTIME; LOAD MYSQL SERVERS TO RUNTIME;"
+        - /bin/sh
+        - -c
+        - |-
+          echo \
+            'LOAD ADMIN VARIABLES TO RUNTIME;' \
+            'LOAD MYSQL QUERY RULES TO RUNTIME;' \
+            'LOAD MYSQL SERVERS TO RUNTIME;' \
+            'LOAD PROXYSQL SERVERS TO RUNTIME;' \
+          | mysql
         image: mysql
         name: mysql-client
         stdin: true
@@ -25,4 +33,4 @@ spec:
       volumes:
       - name: mysql-configuration
         secret:
-          secretName: {{ include "proxysql-cluster.fullname" . }}-.my.cnf
+          secretName: {{ include "proxysql-cluster.fullname" . }}-my-cnf
