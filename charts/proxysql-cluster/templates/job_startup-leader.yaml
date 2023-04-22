@@ -1,37 +1,37 @@
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: {{ include "proxysql-cluster.fullname" . }}-startup-leader
-  labels:
-    {{- include "proxysql-cluster.labels" . | nindent 4 }}
-  annotations:
-    helm.io/hooks: post-install,post-upgrade
-spec:
-  ttlSecondsAfterFinished: 1
-  template:
-    spec:
-      containers:
-      - args:
-        - /bin/sh
-        - -c
-        - |-
-          echo \
-            'LOAD ADMIN VARIABLES TO RUNTIME;' \
-            'LOAD MYSQL QUERY RULES TO RUNTIME;' \
-            'LOAD MYSQL SERVERS TO RUNTIME;' \
-            'LOAD PROXYSQL SERVERS TO RUNTIME;' \
-          | mysql
-        image: mysql
-        name: mysql-client
-        stdin: true
-        stdinOnce: true
-        volumeMounts:
-        - mountPath: /root/.my.cnf
-          subPath: .my.cnf
-          name: mysql-configuration
-          readOnly: true
-      restartPolicy: OnFailure
-      volumes:
-      - name: mysql-configuration
-        secret:
-          secretName: {{ include "proxysql-cluster.fullname" . }}-my-cnf
+# apiVersion: batch/v1
+# kind: Job
+# metadata:
+#   name: {{ include "proxysql-cluster.fullname" . }}-startup-leader
+#   labels:
+#     {{- include "proxysql-cluster.labels" . | nindent 4 }}
+#   annotations:
+#     helm.io/hooks: post-install,post-upgrade
+# spec:
+#   ttlSecondsAfterFinished: 1
+#   template:
+#     spec:
+#       containers:
+#       - args:
+#         - /bin/sh
+#         - -c
+#         - |-
+#           echo \
+#             'LOAD ADMIN VARIABLES TO RUNTIME;' \
+#             'LOAD MYSQL QUERY RULES TO RUNTIME;' \
+#             'LOAD MYSQL SERVERS TO RUNTIME;' \
+#             'LOAD PROXYSQL SERVERS TO RUNTIME;' \
+#           | mysql
+#         image: mysql
+#         name: mysql-client
+#         stdin: true
+#         stdinOnce: true
+#         volumeMounts:
+#         - mountPath: /root/.my.cnf
+#           subPath: .my.cnf
+#           name: mysql-configuration
+#           readOnly: true
+#       restartPolicy: OnFailure
+#       volumes:
+#       - name: mysql-configuration
+#         secret:
+#           secretName: {{ include "proxysql-cluster.fullname" . }}-my-cnf

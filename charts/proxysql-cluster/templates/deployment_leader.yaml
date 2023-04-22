@@ -26,9 +26,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-        - image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        - name: proxysql
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          name: proxysql
           volumeMounts:
           - name: proxysql-leader-config
             mountPath: /etc/proxysql.cnf
@@ -42,10 +42,40 @@ spec:
             name: proxysql-admin
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+        - name: configuration-loader
+          args:
+          - /bin/sh
+          - -c
+          - |-
+            while :; do
+              echo Attempting to reload the configuration...
+              echo \
+                'LOAD ADMIN VARIABLES TO RUNTIME;' \
+                'LOAD MYSQL QUERY RULES TO RUNTIME;' \
+                'LOAD MYSQL SERVERS TO RUNTIME;' \
+                'LOAD PROXYSQL SERVERS TO RUNTIME;' \
+              | mysql
+              if [ ${?} -eq 0 ]; then
+                sleep 3600
+              else
+                sleep 5
+              fi
+            done
+          image: mysql
+          stdin: true
+          stdinOnce: true
+          volumeMounts:
+          - mountPath: /root/.my.cnf
+            subPath: .my.cnf
+            name: mysql-configuration
+            readOnly: true
       volumes:
         - name: proxysql-leader-config
           secret:
             secretName: {{ include "proxysql-cluster.fullname" . }}-leader-configuration
+        - name: mysql-configuration
+          secret:
+            secretName: {{ include "proxysql-cluster.fullname" . }}-my-cnf
         - name: proxysql-data
           {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
